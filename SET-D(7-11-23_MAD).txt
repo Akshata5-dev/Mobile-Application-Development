@@ -1,0 +1,205 @@
+1.Create a new Android Project in Android Studio.
+
+2.Open the "activity_main.xml" file for the first activity and design the UI as follows:
+
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    tools:context=".MainActivity">
+
+    <EditText
+        android:id="@+id/editName"
+        android:hint="Name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <EditText
+        android:id="@+id/editPhoneNumber"
+        android:hint="Phone Number"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Degree Details:"/>
+
+    <CheckBox
+        android:id="@+id/checkboxBE"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="B.E."/>
+
+    <CheckBox
+        android:id="@+id/checkboxME"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="M.E."/>
+
+    <CheckBox
+        android:id="@+id/checkboxPhD"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Ph.D."/>
+
+    <Button
+        android:id="@+id/nextButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Next"
+        android:onClick="goToPositionActivity"/>
+</LinearLayout>
+
+
+1.Create a new XML layout file for the second activity, named "activity_position.xml," and design it to have a Spinner to select the position applying for.
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    tools:context=".PositionActivity">
+
+    <Spinner
+        android:id="@+id/spinnerPosition"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <Button
+        android:id="@+id/showDetailsButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Show Details"
+        android:onClick="showDetails"/>
+</LinearLayout>
+
+2.Create the third activity layout with a TextView to display the applicant details. Name the layout file "activity_display.xml."
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    tools:context=".DisplayActivity">
+
+    <TextView
+        android:id="@+id/displayTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+</LinearLayout>
+
+1.Create the Java code for each activity.
+In MainActivity.java, gather applicant details and pass them to the next activity:
+public class MainActivity extends AppCompatActivity {
+    private EditText editName;
+    private EditText editPhoneNumber;
+    private CheckBox checkboxBE;
+    private CheckBox checkboxME;
+    private CheckBox checkboxPhD;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        editName = findViewById(R.id.editName);
+        editPhoneNumber = findViewById(R.id.editPhoneNumber);
+        checkboxBE = findViewById(R.id.checkboxBE);
+        checkboxME = findViewById(R.id.checkboxME);
+        checkboxPhD = findViewById(R.id.checkboxPhD);
+    }
+
+    public void goToPositionActivity(View view) {
+        Intent intent = new Intent(this, PositionActivity.class);
+
+        // Pass applicant details to the next activity
+        intent.putExtra("name", editName.getText().toString());
+        intent.putExtra("phone", editPhoneNumber.getText().toString());
+        intent.putExtra("degreeDetails", getDegreeDetails());
+
+        startActivity(intent);
+    }
+
+    private String getDegreeDetails() {
+        StringBuilder details = new StringBuilder();
+        if (checkboxBE.isChecked()) {
+            details.append("B.E., ");
+        }
+        if (checkboxME.isChecked()) {
+            details.append("M.E., ");
+        }
+        if (checkboxPhD.isChecked()) {
+            details.append("Ph.D.");
+        }
+        return details.toString();
+    }
+}
+
+
+In PositionActivity.java, populate the Spinner and pass the selected position to the next activity:
+public class PositionActivity extends AppCompatActivity {
+    private Spinner spinnerPosition;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_position);
+
+        spinnerPosition = findViewById(R.id.spinnerPosition);
+
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.positions_array, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerPosition.setAdapter(adapter);
+    }
+
+    public void showDetails(View view) {
+        Intent intent = new Intent(this, DisplayActivity.class);
+        intent.putExtra("position", spinnerPosition.getSelectedItem().toString());
+        intent.putExtra("name", getIntent().getStringExtra("name"));
+        intent.putExtra("phone", getIntent().getStringExtra("phone"));
+        intent.putExtra("degreeDetails", getIntent().getStringExtra("degreeDetails"));
+        startActivity(intent);
+    }
+}
+
+
+Create a string array resource in strings.xml to populate the Spinner in the second activity:
+
+<resources>
+    <string-array name="positions_array">
+        <item>Assistant Professor</item>
+        <item>Associate Professor</item>
+        <item>Professor</item>
+        <item>Director</item>
+        <item>Chief Librarian</item>
+        <item>Lab Technician</item>
+    </string-array>
+</resources>
+
+
+
+In DisplayActivity.java, retrieve the details and display them in a TextView:
+public class DisplayActivity extends AppCompatActivity {
+    private TextView displayTextView;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_display);
+
+        displayTextView = findViewById(R.id.displayTextView);
+
+        String name = getIntent().getStringExtra("name");
+        String phone = getIntent().getStringExtra("phone");
+
+
+
